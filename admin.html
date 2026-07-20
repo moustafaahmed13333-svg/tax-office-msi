@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم | محمد سمير إسماعيل</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --navy:#0B1E3D; --navy-2:#122A52; --gold:#C9A227; --gold-light:#E4C766;
+    --white:#FFFFFF; --gray-bg:#F3F4F6; --gray-line:#E3E5EA; --text-muted:#5B6472;
+    --radius:14px; --shadow:0 10px 30px rgba(11,30,61,0.08); --sidebar-w:260px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--gray-bg);color:var(--navy);}
+  a{text-decoration:none;color:inherit;} ul{list-style:none;} button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* ===== LOGIN SCREEN ===== */
+  #loginScreen{
+    position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;
+    z-index:2000;padding:20px;
+  }
+  #loginScreen::before{
+    content:"";position:absolute;inset:0;
+    background-image:repeating-linear-gradient(0deg, rgba(201,162,39,.06) 0px, rgba(201,162,39,.06) 1px, transparent 1px, transparent 64px);
+  }
+  .login-box{
+    position:relative;z-index:2;background:var(--white);width:100%;max-width:380px;border-radius:var(--radius);
+    padding:38px 30px;box-shadow:0 20px 50px rgba(0,0,0,.3);
+  }
+  .login-box .logo-badge{
+    width:56px;height:56px;border-radius:50%;margin:0 auto 16px;
+    background:linear-gradient(145deg,var(--gold-light),var(--gold));
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--navy);font-size:24px;
+  }
+  .logo-mark-lg{
+    width:76px;height:76px;border-radius:16px;margin:0 auto 16px;background:#fff;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.1);padding:8px;
+  }
+  .logo-mark-lg img{width:100%;height:100%;object-fit:contain;}
+  .logo-mark-sm{
+    width:40px;height:40px;border-radius:10px;background:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;padding:4px;
+  }
+  .logo-mark-sm img{width:100%;height:100%;object-fit:contain;}
+  .login-box h1{font-size:18px;text-align:center;margin-bottom:4px;}
+  .login-box p.sub{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:26px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;}
+  .field input{
+    width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--gray-line);font-size:14.5px;font-family:inherit;
+  }
+  .login-btn{
+    width:100%;padding:13px;border-radius:9px;background:var(--gold);color:var(--navy);font-weight:800;font-size:15px;margin-top:6px;
+  }
+  .login-btn:hover{background:var(--gold-light);}
+  .login-note{
+    margin-top:18px;font-size:12px;color:var(--text-muted);background:var(--gray-bg);
+    padding:12px;border-radius:8px;text-align:center;line-height:1.6;
+  }
+
+  /* ===== ADMIN SHELL ===== */
+  #adminShell{display:none;min-height:100vh;}
+  #adminShell.active{display:flex;}
+  .sidebar{
+    width:var(--sidebar-w);background:var(--navy);color:#fff;flex-shrink:0;
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .sidebar-brand{padding:22px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);}
+  .sidebar-brand .logo-badge{
+    width:38px;height:38px;border-radius:50%;background:linear-gradient(145deg,var(--gold-light),var(--gold));
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--navy);font-size:16px;flex-shrink:0;
+  }
+  .sidebar-brand strong{font-size:13.5px;display:block;}
+  .sidebar-brand span{font-size:11px;color:rgba(255,255,255,.5);}
+  .side-group{padding:16px 12px 4px;font-size:11px;color:rgba(255,255,255,.4);font-weight:700;letter-spacing:.4px;}
+  .side-link{
+    display:flex;align-items:center;gap:12px;padding:12px 18px;margin:2px 10px;border-radius:9px;
+    font-size:14px;color:rgba(255,255,255,.75);transition:.2s;
+  }
+  .side-link i{width:18px;text-align:center;color:rgba(255,255,255,.5);}
+  .side-link:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .side-link.active{background:rgba(201,162,39,.15);color:var(--gold-light);}
+  .side-link.active i{color:var(--gold-light);}
+
+  .main-area{flex:1;min-width:0;}
+  .topbar{
+    background:#fff;border-bottom:1px solid var(--gray-line);padding:16px 28px;
+    display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;
+  }
+  .topbar h2{font-size:17px;}
+  .topbar-actions{display:flex;align-items:center;gap:14px;}
+  .admin-chip{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;}
+  .admin-chip .dot{width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+  .logout-btn{background:var(--gray-bg);padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;color:var(--navy);}
+  .logout-btn:hover{background:var(--gray-line);}
+
+  .panel{display:none;padding:28px;}
+  .panel.active{display:block;}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-bottom:28px;}
+  .stat-card{background:#fff;border-radius:var(--radius);padding:22px;border:1px solid var(--gray-line);}
+  .stat-card i{color:var(--gold);font-size:20px;margin-bottom:12px;}
+  .stat-card strong{display:block;font-size:26px;font-weight:800;}
+  .stat-card span{font-size:12.5px;color:var(--text-muted);}
+
+  .card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-line);padding:24px;margin-bottom:20px;}
+  .card h3{font-size:15.5px;margin-bottom:16px;}
+
+  .quick-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+  .quick-item{
+    background:var(--gray-bg);border:1px solid var(--gray-line);border-radius:12px;
+    padding:20px 10px;text-align:center;cursor:pointer;transition:.2s;
+  }
+  .quick-item:hover{background:rgba(201,162,39,.1);border-color:var(--gold);transform:translateY(-3px);}
+  .quick-item i{font-size:22px;color:var(--gold);display:block;margin-bottom:10px;}
+  .quick-item span{font-size:12px;font-weight:700;color:var(--navy);}
+  @media(max-width:980px){.quick-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:760px){.quick-grid{grid-template-columns:repeat(2,1fr);}}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{padding:12px 10px;text-align:right;border-bottom:1px solid var(--gray-line);}
+  th{color:var(--text-muted);font-weight:700;font-size:12.5px;}
+  .badge{padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:rgba(201,162,39,.12);color:#8a6d10;}
+  .row-actions button{background:none;color:var(--text-muted);font-size:14px;padding:4px 6px;}
+  .row-actions button:hover{color:var(--navy);}
+
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--text-muted);
+  }
+  .empty-state i{font-size:34px;color:var(--gold);margin-bottom:14px;display:block;}
+  .empty-state h3{color:var(--navy);font-size:16px;margin-bottom:8px;}
+  .empty-state p{font-size:13.5px;max-width:420px;margin:0 auto;}
+
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .card-head h3{margin-bottom:0;}
+  .add-btn{
+    background:var(--gold);color:var(--navy);padding:10px 18px;border-radius:8px;font-size:13.5px;font-weight:700;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .add-btn:hover{background:var(--gold-light);}
+  .add-form{
+    display:none;background:var(--gray-bg);border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid var(--gray-line);
+  }
+  .add-form.open{display:block;}
+  .form-grid-admin{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-grid-admin .f.full{grid-column:1/-1;}
+  .form-grid-admin .f label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--text-muted);}
+  .form-grid-admin .f input, .form-grid-admin .f select, .form-grid-admin .f textarea{
+    width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--gray-line);font-family:inherit;font-size:13.5px;background:#fff;
+  }
+  .form-grid-admin .f textarea{resize:vertical;}
+  .form-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .save-btn{background:var(--navy);color:#fff;padding:11px 22px;border-radius:8px;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}
+  .save-btn:hover{background:var(--navy-2);}
+  .cancel-btn{background:var(--gray-line);color:var(--navy);padding:11px 22px;border-radius:8px;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}
+  .cancel-btn:hover{background:#d7d9de;}
+  .hint{color:var(--text-muted);font-size:12.5px;margin-top:6px;}
+  @media(max-width:760px){.form-grid-admin{grid-template-columns:1fr;}}
+
+  .burger-admin{display:none;background:none;font-size:20px;color:var(--navy);}
+
+  @media(max-width:980px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:760px){
+    .sidebar{position:fixed;insetInlineStart:0;top:0;z-index:1500;transform:translateX(100%);transition:.3s;}
+    html[dir="rtl"] .sidebar{transform:translateX(100%);}
+    .sidebar.open{transform:translateX(0);}
+    .burger-admin{display:block;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .panel{padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo-mark-lg"><img src="logo-icon.png" alt="محمد سمير إسماعيل"></div>
+    <h1>لوحة تحكم محمد سمير إسماعيل</h1>
+    <p class="sub">تسجيل دخول الإدارة</p>
+    <form id="loginForm">
+      <div class="field"><label>البريد الإلكتروني</label><input type="email" required placeholder="admin@example.com"></div>
+      <div class="field"><label>كلمة المرور</label><input type="password" required placeholder="••••••••"></div>
+      <button type="submit" class="login-btn"><i class="fa-solid fa-right-to-bracket"></i> دخول</button>
+    </form>
+    <div class="login-note">
+      دي معاينة لشكل الشاشة فقط — تسجيل الدخول الفعلي والحماية هيتفعّلوا مع Firebase Authentication في مرحلة الربط الجاية. دلوقتي أي بيانات هتدخلك للمعاينة.
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN SHELL ===== -->
+<div id="adminShell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-mark-sm"><img src="logo-icon.png" alt="محمد سمير إسماعيل"></div>
+      <div><strong>لوحة التحكم</strong><span>محمد سمير إسماعيل</span></div>
+    </div>
+
+    <div class="side-group">عام</div>
+    <a class="side-link active" data-panel="dashboard"><i class="fa-solid fa-gauge"></i> الرئيسية</a>
+
+    <div class="side-group">المحتوى</div>
+    <a class="side-link" data-panel="services"><i class="fa-solid fa-briefcase"></i> إدارة الخدمات</a>
+    <a class="side-link" data-panel="articles"><i class="fa-solid fa-newspaper"></i> إدارة المقالات</a>
+    <a class="side-link" data-panel="homepage"><i class="fa-solid fa-house"></i> الصفحة الرئيسية</a>
+    <a class="side-link" data-panel="faqs"><i class="fa-solid fa-circle-question"></i> الأسئلة الشائعة</a>
+    <a class="side-link" data-panel="testimonials"><i class="fa-solid fa-comment-dots"></i> آراء العملاء</a>
+
+    <div class="side-group">العملاء</div>
+    <a class="side-link" data-panel="clients"><i class="fa-solid fa-users"></i> طلبات التواصل</a>
+
+    <div class="side-group">الإعدادات</div>
+    <a class="side-link" data-panel="contactinfo"><i class="fa-solid fa-address-book"></i> بيانات التواصل</a>
+    <a class="side-link" data-panel="social"><i class="fa-solid fa-share-nodes"></i> وسائل التواصل</a>
+    <a class="side-link" data-panel="users"><i class="fa-solid fa-user-shield"></i> المستخدمون والصلاحيات</a>
+    <a class="side-link" data-panel="backup"><i class="fa-solid fa-database"></i> نسخ احتياطي</a>
+    <a class="side-link" data-panel="activity"><i class="fa-solid fa-clock-rotate-left"></i> سجل النشاط</a>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="burger-admin" id="burgerAdmin"><i class="fa-solid fa-bars"></i></button>
+        <h2 id="panelTitle">لوحة التحكم</h2>
+      </div>
+      <div class="topbar-actions">
+        <div class="admin-chip"><div class="dot">م</div> <span>الأدمن</span></div>
+        <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <section class="panel active" id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><i class="fa-solid fa-eye"></i><strong>—</strong><span>عدد الزيارات</span></div>
+        <div class="stat-card"><i class="fa-solid fa-calendar-check"></i><strong>—</strong><span>طلبات الاستشارة</span></div>
+        <div class="stat-card"><i class="fa-solid fa-envelope"></i><strong>—</strong><span>الرسائل</span></div>
+        <div class="stat-card"><i class="fa-solid fa-newspaper"></i><strong>—</strong><span>عدد المقالات</span></div>
+        <div class="stat-card"><i class="fa-solid fa-briefcase"></i><strong>6</strong><span>عدد الخدمات</span></div>
+      </div>
+      <div class="card">
+        <h3>كل أقسام الموقع</h3>
+        <div class="quick-grid">
+          <div class="quick-item" data-panel="services"><i class="fa-solid fa-briefcase"></i><span>الخدمات</span></div>
+          <div class="quick-item" data-panel="articles"><i class="fa-solid fa-newspaper"></i><span>المقالات</span></div>
+          <div class="quick-item" data-panel="homepage"><i class="fa-solid fa-house"></i><span>الصفحة الرئيسية</span></div>
+          <div class="quick-item" data-panel="faqs"><i class="fa-solid fa-circle-question"></i><span>الأسئلة الشائعة</span></div>
+          <div class="quick-item" data-panel="testimonials"><i class="fa-solid fa-comment-dots"></i><span>آراء العملاء</span></div>
+          <div class="quick-item" data-panel="clients"><i class="fa-solid fa-users"></i><span>طلبات العملاء</span></div>
+          <div class="quick-item" data-panel="contactinfo"><i class="fa-solid fa-address-book"></i><span>بيانات التواصل</span></div>
+          <div class="quick-item" data-panel="social"><i class="fa-solid fa-share-nodes"></i><span>وسائل التواصل</span></div>
+          <div class="quick-item" data-panel="users"><i class="fa-solid fa-user-shield"></i><span>المستخدمون</span></div>
+          <div class="quick-item" data-panel="backup"><i class="fa-solid fa-database"></i><span>نسخ احتياطي</span></div>
+          <div class="quick-item" data-panel="activity"><i class="fa-solid fa-clock-rotate-left"></i><span>سجل النشاط</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="empty-state">
+          <i class="fa-solid fa-chart-line"></i>
+          <h3>الإحصائيات هتظهر هنا فعليًا بعد ربط Firebase</h3>
+          <p>الأرقام دلوقتي placeholder بس عشان تشوف شكل اللوحة — هتتحدث تلقائيًا لما نربط البيانات الحقيقية في المرحلة الجاية.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section class="panel" id="panel-services">
+      <div class="card">
+        <div class="card-head"><h3>الخدمات الحالية (من محتوى الموقع)</h3><button class="add-btn" onclick="toggleForm('form-service')"><i class="fa-solid fa-plus"></i> إضافة خدمة</button></div>
+        <div class="add-form" id="form-service">
+          <div class="form-grid-admin">
+            <div class="f full"><label>اسم الخدمة</label><input type="text" placeholder="مثال: خدمات التسعير التحويلي"></div>
+            <div class="f full"><label>وصف مختصر (يظهر في الصفحة الرئيسية)</label><textarea rows="2"></textarea></div>
+            <div class="f"><label>أيقونة (اسم Font Awesome)</label><input type="text" placeholder="fa-solid fa-file-invoice"></div>
+            <div class="f"><label>الترتيب</label><input type="number" value="7"></div>
+            <div class="f full"><label>البنود التفصيلية (كل بند في سطر — تظهر في صفحة "جميع الخدمات")</label><textarea rows="4" placeholder="بند 1&#10;بند 2&#10;بند 3"></textarea></div>
+          </div>
+          <div class="form-btns"><button class="save-btn">حفظ الخدمة</button><button class="cancel-btn" onclick="toggleForm('form-service')">إلغاء</button></div>
+        </div>
+        <table>
+          <thead><tr><th>الخدمة</th><th>الحالة</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>إعداد الإقرارات الضريبية</td><td><span class="badge">مفعّلة</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>الاستشارات الضريبية</td><td><span class="badge">مفعّلة</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>الفحص الضريبي</td><td><span class="badge">مفعّلة</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>مراجعة القوائم المالية</td><td><span class="badge">مفعّلة</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>تأسيس الشركات</td><td><span class="badge">مفعّلة</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>دراسات الجدوى الاقتصادية</td><td><span class="badge">مفعّلة</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color:var(--text-muted);font-size:13px;">التعديل والحذف والإضافة هيتفعّلوا فعليًا بعد ربط Firebase — دي معاينة للشكل فقط.</p>
+    </section>
+
+    <!-- Articles -->
+    <section class="panel" id="panel-articles">
+      <div class="card">
+        <div class="card-head"><h3>المقالات</h3><button class="add-btn" onclick="toggleForm('form-article')"><i class="fa-solid fa-plus"></i> إضافة مقال</button></div>
+        <div class="add-form" id="form-article">
+          <div class="form-grid-admin">
+            <div class="f"><label>عنوان المقال</label><input type="text" placeholder="مثال: أهم التعديلات على قانون الضريبة"></div>
+            <div class="f"><label>التصنيف</label><input type="text" placeholder="تحديثات قانونية"></div>
+            <div class="f"><label>رابط المقال (Slug)</label><input type="text" placeholder="tax-law-updates-2026"></div>
+            <div class="f"><label>تاريخ النشر</label><input type="date"></div>
+            <div class="f full"><label>صورة المقال</label><input type="file" accept="image/*"></div>
+            <div class="f full"><label>محتوى المقال</label><textarea rows="5" placeholder="اكتب محتوى المقال هنا..."></textarea></div>
+            <div class="f"><label>عنوان SEO (Meta Title)</label><input type="text"></div>
+            <div class="f"><label>وصف SEO (Meta Description)</label><input type="text"></div>
+          </div>
+          <div class="form-btns"><button class="save-btn">حفظ المقال</button><button class="cancel-btn" onclick="toggleForm('form-article')">إلغاء</button></div>
+        </div>
+        <table>
+          <thead><tr><th>العنوان</th><th>التصنيف</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>أهم التعديلات على قانون الضريبة على الدخل</td><td>تحديثات قانونية</td><td>—</td><td><span class="badge">منشور</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>خطوات تقديم الإقرار الضريبي بدون أخطاء</td><td>إرشادات</td><td>—</td><td><span class="badge">منشور</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>كيف تستعد لفحص ضريبي بثقة</td><td>فحص ضريبي</td><td>—</td><td><span class="badge">منشور</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">الإضافة والتعديل والحذف هيتفعّلوا فعليًا بعد ربط Firebase — دي معاينة للشكل والحقول.</p>
+    </section>
+
+    <!-- Homepage content -->
+    <section class="panel" id="panel-homepage">
+      <div class="card">
+        <h3>قسم Hero (أعلى الصفحة الرئيسية)</h3>
+        <div class="form-grid-admin">
+          <div class="f full"><label>العنوان الرئيسي</label><input type="text" value="خبرة محاسبية وضريبية تمنح أعمالك الثقة والاستقرار"></div>
+          <div class="f full"><label>الوصف تحت العنوان</label><textarea rows="2">نرافق شركتك خطوة بخطوة في الإقرارات الضريبية، الفحص الضريبي، الاستشارات، ومراجعة القوائم المالية.</textarea></div>
+          <div class="f"><label>نص الزر الأول</label><input type="text" value="احجز استشارة"></div>
+          <div class="f"><label>نص الزر الثاني</label><input type="text" value="تواصل عبر واتساب"></div>
+          <div class="f"><label>سنوات الخبرة</label><input type="text" value="15+"></div>
+          <div class="f"><label>عدد العملاء</label><input type="text" value="300+"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>قسم من نحن (معاينة الصفحة الرئيسية)</h3>
+        <div class="form-grid-admin">
+          <div class="f full"><label>رسالتنا</label><textarea rows="2">تقديم حلول محاسبية وضريبية دقيقة تحمي أعمال عملائنا.</textarea></div>
+          <div class="f full"><label>رؤيتنا</label><textarea rows="2">أن نكون الشريك الضريبي الأول الموثوق للشركات الناشئة والمؤسسات.</textarea></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>الشعار والصور</h3>
+        <div class="form-grid-admin">
+          <div class="f"><label>شعار المكتب</label><input type="file" accept="image/*"></div>
+          <div class="f"><label>صورة خلفية Hero (اختياري)</label><input type="file" accept="image/*"></div>
+        </div>
+      </div>
+      <div class="form-btns"><button class="save-btn">حفظ تعديلات الصفحة الرئيسية</button></div>
+      <p class="hint">الحفظ الفعلي هيتفعّل بعد ربط Firebase — دي معاينة للحقول.</p>
+    </section>
+
+    <!-- FAQs -->
+    <section class="panel" id="panel-faqs">
+      <div class="card">
+        <div class="card-head"><h3>الأسئلة الشائعة</h3><button class="add-btn" onclick="toggleForm('form-faq')"><i class="fa-solid fa-plus"></i> إضافة سؤال</button></div>
+        <div class="add-form" id="form-faq">
+          <div class="form-grid-admin">
+            <div class="f full"><label>السؤال</label><input type="text" placeholder="مثال: ما هي مواعيد تقديم الإقرارات الضريبية؟"></div>
+            <div class="f full"><label>الإجابة</label><textarea rows="3"></textarea></div>
+            <div class="f"><label>الترتيب</label><input type="number" value="1"></div>
+          </div>
+          <div class="form-btns"><button class="save-btn">حفظ السؤال</button><button class="cancel-btn" onclick="toggleForm('form-faq')">إلغاء</button></div>
+        </div>
+        <table>
+          <thead><tr><th>السؤال</th><th>الترتيب</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>ما هي مواعيد تقديم الإقرارات الضريبية؟</td><td>1</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>هل تقدمون خدمات لأصحاب المشروعات الناشئة؟</td><td>2</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>هل بياناتنا المالية آمنة معكم؟</td><td>3</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>كيف أطلب استشارة أولى؟</td><td>4</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>هل تمثلون العميل أمام مأمورية الضرائب؟</td><td>5</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">الإضافة والتعديل والحذف هيتفعّلوا فعليًا بعد ربط Firebase.</p>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="panel" id="panel-testimonials">
+      <div class="card">
+        <div class="card-head"><h3>آراء العملاء</h3><button class="add-btn" onclick="toggleForm('form-testi')"><i class="fa-solid fa-plus"></i> إضافة رأي</button></div>
+        <div class="add-form" id="form-testi">
+          <div class="form-grid-admin">
+            <div class="f"><label>اسم العميل / الصفة</label><input type="text" placeholder="مثال: صاحب شركة تجارية"></div>
+            <div class="f"><label>المنطقة</label><input type="text" placeholder="القاهرة"></div>
+            <div class="f full"><label>نص الرأي</label><textarea rows="3"></textarea></div>
+          </div>
+          <div class="form-btns"><button class="save-btn">حفظ الرأي</button><button class="cancel-btn" onclick="toggleForm('form-testi')">إلغاء</button></div>
+        </div>
+        <table>
+          <thead><tr><th>الاسم / الصفة</th><th>المنطقة</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>صاحب شركة تجارية</td><td>القاهرة</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>مدير مالي</td><td>مصر الجديدة</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+            <tr><td>مؤسس شركة ناشئة</td><td>القاهرة الجديدة</td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button><button><i class="fa-solid fa-trash"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">الإضافة والتعديل والحذف هيتفعّلوا فعليًا بعد ربط Firebase.</p>
+    </section>
+
+    <!-- Client / consultation requests -->
+    <section class="panel" id="panel-clients">
+      <div class="card">
+        <div class="card-head">
+          <h3>طلبات التواصل والاستشارات</h3>
+          <div style="display:flex;gap:10px;">
+            <button class="add-btn" style="background:var(--gray-bg);color:var(--navy);"><i class="fa-solid fa-file-excel"></i> تصدير Excel</button>
+            <button class="add-btn" style="background:var(--gray-bg);color:var(--navy);"><i class="fa-solid fa-file-pdf"></i> تصدير PDF</button>
+          </div>
+        </div>
+        <div class="form-grid-admin" style="margin-bottom:16px;">
+          <div class="f"><label>بحث</label><input type="text" placeholder="ابحث بالاسم أو الهاتف"></div>
+          <div class="f"><label>الحالة</label><select><option>الكل</option><option>جديد</option><option>تم التواصل</option><option>مغلق</option></select></div>
+        </div>
+        <table>
+          <thead><tr><th>الاسم</th><th>الهاتف</th><th>الخدمة المطلوبة</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:26px;">لا توجد طلبات بعد — هتظهر هنا تلقائيًا بمجرد ما عميل يبعت من نموذج "طلب استشارة" على الموقع.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">الطلبات هتتسجل تلقائيًا هنا بعد ربط Firebase بنموذج الاستشارة.</p>
+    </section>
+
+    <!-- Contact info -->
+    <section class="panel" id="panel-contactinfo">
+      <div class="card">
+        <h3>بيانات التواصل الظاهرة في الموقع</h3>
+        <div class="form-grid-admin">
+          <div class="f full"><label>العنوان</label><input type="text" value="23 ش صلاح سالم، مصر الجديدة، القاهرة — أمام بانوراما حرب 6 أكتوبر"></div>
+          <div class="f"><label>الهاتف / واتساب</label><input type="text" value="01063060656"></div>
+          <div class="f"><label>البريد الإلكتروني</label><input type="email" placeholder="info@example.com"></div>
+          <div class="f"><label>أيام العمل</label><input type="text" value="الأحد – الخميس"></div>
+          <div class="f"><label>ساعات العمل</label><input type="text" value="9 صباحاً – 5 مساءً"></div>
+          <div class="f full"><label>رابط خرائط جوجل</label><input type="text" placeholder="https://maps.google.com/..."></div>
+        </div>
+        <div class="form-btns"><button class="save-btn">حفظ بيانات التواصل</button></div>
+      </div>
+      <p class="hint">الحفظ الفعلي هيتفعّل بعد ربط Firebase.</p>
+    </section>
+
+    <!-- Social links -->
+    <section class="panel" id="panel-social">
+      <div class="card">
+        <h3>روابط التواصل الاجتماعي</h3>
+        <div class="form-grid-admin">
+          <div class="f"><label><i class="fa-brands fa-facebook-f"></i> فيسبوك</label><input type="text" placeholder="https://facebook.com/..."></div>
+          <div class="f"><label><i class="fa-brands fa-whatsapp"></i> واتساب</label><input type="text" value="https://wa.me/201063060656"></div>
+          <div class="f"><label><i class="fa-brands fa-linkedin-in"></i> لينكدإن</label><input type="text" placeholder="https://linkedin.com/..."></div>
+          <div class="f"><label><i class="fa-brands fa-instagram"></i> إنستجرام (اختياري)</label><input type="text" placeholder="https://instagram.com/..."></div>
+        </div>
+        <div class="form-btns"><button class="save-btn">حفظ الروابط</button></div>
+      </div>
+      <p class="hint">الحفظ الفعلي هيتفعّل بعد ربط Firebase.</p>
+    </section>
+
+    <!-- Users & permissions -->
+    <section class="panel" id="panel-users">
+      <div class="card">
+        <div class="card-head"><h3>المستخدمون والصلاحيات</h3><button class="add-btn" onclick="toggleForm('form-user')"><i class="fa-solid fa-plus"></i> إضافة مستخدم</button></div>
+        <div class="add-form" id="form-user">
+          <div class="form-grid-admin">
+            <div class="f"><label>الاسم</label><input type="text"></div>
+            <div class="f"><label>البريد الإلكتروني</label><input type="email"></div>
+            <div class="f"><label>كلمة المرور المبدئية</label><input type="password"></div>
+            <div class="f">
+              <label>الصلاحية</label>
+              <select>
+                <option>أدمن رئيسي (كل الصلاحيات)</option>
+                <option>إدارة المحتوى فقط</option>
+                <option>إدارة طلبات العملاء فقط</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-btns"><button class="save-btn">إضافة المستخدم</button><button class="cancel-btn" onclick="toggleForm('form-user')">إلغاء</button></div>
+        </div>
+        <table>
+          <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الصلاحية</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>محمد سمير إسماعيل</td><td>—</td><td><span class="badge">أدمن رئيسي</span></td><td class="row-actions"><button><i class="fa-solid fa-pen"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">إضافة وتعديل صلاحيات المستخدمين هتتفعّل فعليًا بعد ربط Firebase Authentication.</p>
+    </section>
+
+    <!-- Backup -->
+    <section class="panel" id="panel-backup">
+      <div class="card">
+        <h3>نسخ احتياطي واستعادة</h3>
+        <p style="color:var(--text-muted);font-size:14px;margin-bottom:18px;">تحميل نسخة كاملة من بيانات الموقع (الخدمات، المقالات، الأسئلة الشائعة، طلبات العملاء) أو استعادة نسخة سابقة.</p>
+        <div class="form-btns">
+          <button class="save-btn"><i class="fa-solid fa-download"></i> تحميل نسخة احتياطية</button>
+          <button class="cancel-btn"><i class="fa-solid fa-upload"></i> استعادة من ملف</button>
+        </div>
+      </div>
+      <p class="hint">التفعيل الفعلي هيكون بعد ربط Firebase.</p>
+    </section>
+
+    <!-- Activity log -->
+    <section class="panel" id="panel-activity">
+      <div class="card">
+        <h3>سجل النشاط</h3>
+        <table>
+          <thead><tr><th>الإجراء</th><th>بواسطة</th><th>التاريخ</th></tr></thead>
+          <tbody>
+            <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:26px;">هيتسجل هنا كل تعديل يحصل في اللوحة (إضافة/تعديل/حذف) بمجرد ربط Firebase.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+// preview-only login (no real auth yet — wired to Firebase in the next phase)
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminShell').classList.add('active');
+});
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  document.getElementById('adminShell').classList.remove('active');
+  document.getElementById('loginScreen').style.display = 'flex';
+});
+
+// sidebar nav switching
+const links = document.querySelectorAll('.side-link');
+const panelTitle = document.getElementById('panelTitle');
+function goToPanel(panelId, label){
+  links.forEach(l => l.classList.toggle('active', l.dataset.panel === panelId));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+  panelTitle.textContent = label;
+  document.getElementById('sidebar').classList.remove('open');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+links.forEach(link => {
+  link.addEventListener('click', () => goToPanel(link.dataset.panel, link.textContent.trim()));
+});
+document.querySelectorAll('.quick-item').forEach(item => {
+  item.addEventListener('click', () => goToPanel(item.dataset.panel, item.querySelector('span').textContent.trim()));
+});
+
+// mobile sidebar toggle
+document.getElementById('burgerAdmin').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// show/hide "add new" forms across every panel (preview only — will save to Firebase later)
+function toggleForm(id){
+  document.getElementById(id).classList.toggle('open');
+}
+// preview-only save buttons: confirm the click works, real saving comes with Firebase
+document.querySelectorAll('.save-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('هيتفعّل الحفظ الفعلي بعد ربط Firebase — دلوقتي دي معاينة للشكل فقط.');
+  });
+});
+</script>
+</body>
+</html>
